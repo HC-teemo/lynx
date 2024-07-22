@@ -380,7 +380,7 @@ object PPTFilterPushDownRule extends PhysicalPlanOptimizerRule {
         }
         else (null, false)
       }
-      case Seq(pep@Expand(rel, right)) => {
+      case Seq(pep@Expand(rel, right, _)) => {
         val expandAndSet = expandPathPushDown(pf.expr, right, pep, ppc)
         if (expandAndSet._2.isEmpty) (Seq(expandAndSet._1), true)
         else (Seq(plans.Filter(expandAndSet._2.head)(expandAndSet._1, ppc)), true)
@@ -493,10 +493,10 @@ object PPTFilterPushDownRule extends PhysicalPlanOptimizerRule {
   def bottomUpExpandPath(nodeLabels: Map[String, Seq[LabelName]], nodeProperties: Map[String, Option[Expression]],
                          pptNode: PhysicalPlan, ppc: PhysicalPlannerContext): PhysicalPlan = {
     pptNode match {
-      case e@Expand(rel, right) =>
+      case e@Expand(rel, right, o) =>
         val newPEP = bottomUpExpandPath(nodeLabels: Map[String, Seq[LabelName]], nodeProperties: Map[String, Option[Expression]], e.children.head, ppc)
         val expandRightPattern = getNewNodePattern(right, nodeLabels, nodeProperties)
-        plans.Expand(rel, expandRightPattern)(newPEP, ppc)
+        plans.Expand(rel, expandRightPattern, o)(newPEP, ppc)
 
       case r@RelationshipScan(rel, left, right) => {
         val leftPattern = getNewNodePattern(left, nodeLabels, nodeProperties)

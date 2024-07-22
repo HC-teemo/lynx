@@ -1,7 +1,7 @@
 package org.grapheco.lynx.optimizer
 
 import org.grapheco.lynx.physical._
-import org.grapheco.lynx.physical.plans.{Apply, Distinct, Expand, CreateUnit, Filter, Join, Merge, NodeScan, RelationshipScan, Select, ShortestPath, Unwind, With, PhysicalPlan}
+import org.grapheco.lynx.physical.plans.{Apply, CreateUnit, Distinct, Expand, Filter, FromArgument, Join, Merge, NodeScan, PhysicalPlan, RelationshipScan, Select, ShortestPath, Unwind, With}
 import org.opencypher.v9_0.expressions._
 
 import scala.collection.mutable
@@ -60,19 +60,20 @@ object JoinReferenceRule extends PhysicalPlanOptimizerRule {
 
         (pe.withChildren(Seq(res)), leftChecked._1 ++ rightChecked._1)
       }
-      case Seq(pe2@Expand(rel, rightPattern)) => {
+      case Seq(pe2@Expand(rel, rightPattern, o)) => {
         val res = checkExpandPath(pe2, ppc)
         val rightChecked = checkNodeReference(rightPattern)
 
         val newPPTExpandPath = {
           if (rightChecked._2.nonEmpty) {
-            plans.Expand(rel, rightChecked._2.get)(res._1, ppc)
+            plans.Expand(rel, rightChecked._2.get, o)(res._1, ppc)
           }
           else pe2.withChildren(Seq(res._1))
         }
 
         (newPPTExpandPath, res._2 ++ rightChecked._1)
       }
+      case Seq(fa@FromArgument(arg)) => (pe.withChildren(Seq(fa)), Seq())
     }
   }
 
@@ -117,7 +118,7 @@ object JoinReferenceRule extends PhysicalPlanOptimizerRule {
           case (value1, value2) => plans.ShortestPath(rel, leftChecked._2.get, rightChecked._2.get, single, resName)(ppc)
         }
       }
-      case pe@Expand(rel, rightPattern) => {
+      case pe@Expand(rel, rightPattern, _) => {
         val res = checkExpandPath(pe, ppc)
         referenceProperty ++= res._2
         res._1

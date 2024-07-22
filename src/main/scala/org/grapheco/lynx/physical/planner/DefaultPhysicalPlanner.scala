@@ -36,11 +36,17 @@ class DefaultPhysicalPlanner(runnerContext: CypherRunnerContext) extends Physica
       case ll@LogicalSkip(expr) => Skip(expr)(plan(ll.in), plannerContext)
       case lj@LogicalJoin(isSingleMatch, joinType) => Join(None, isSingleMatch, joinType)(plan(lj.a), plan(lj.b), plannerContext)
       case lc@LogicalCross() => Cross()(plan(lc.a), plan(lc.b), plannerContext)
-      case ap@LogicalAndThen() => {
+      case ap@LogicalAndThen(joinType) => {
         val first = plan(ap.first)
         val contextWithArg: PhysicalPlannerContext = plannerContext.withArgumentsContext(first.schema.map(_._1))
         val andThen = plan(ap._then)(contextWithArg)
-        Apply()(first, andThen, contextWithArg)
+        Apply(joinType)(first, andThen, contextWithArg)
+      }
+      case aj@LogicalAndThenJoin(isSingleMatch, joinType) => {
+        val first = plan(aj.first)
+        val contextWithArg: PhysicalPlannerContext = plannerContext.withArgumentsContext(first.schema.map(_._1))
+        val andThen = plan(aj._then)(contextWithArg)
+        Join(None, isSingleMatch, joinType)(first, andThen, contextWithArg)
       }
       case patternMatch: LogicalPatternMatch => PPTPatternMatchTranslator(patternMatch)(plannerContext).translate(None)
       case lPTShortestPaths : LogicalShortestPaths => LPTShortestPathTranslator(lPTShortestPaths)(plannerContext).translate(None)
