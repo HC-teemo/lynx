@@ -2,8 +2,8 @@ package org.grapheco.lynx.physical.planner
 
 import org.grapheco.lynx.logical.plans._
 import org.grapheco.lynx.physical._
-import org.grapheco.lynx.physical.planner.translators.{LPTShortestPathTranslator, PPTCreateTranslator, PPTMergeTranslator, PPTPatternMatchTranslator, PPTRemoveTranslator, PPTSetClauseTranslator, PPTUnwindTranslator}
-import org.grapheco.lynx.physical.plans.{Aggregation, Apply, Cross, Delete, Distinct, CreateIndex, CreateUnit, DropIndex, Filter, Join, Limit, OrderBy, ProcedureCall, Project, Select, Skip, Union, With, PhysicalPlan}
+import org.grapheco.lynx.physical.planner.translators.{GraphPatternMatchTranslator, LPTShortestPathTranslator, PPTCreateTranslator, PPTMergeTranslator, PPTPatternMatchTranslator, PPTRemoveTranslator, PPTSetClauseTranslator, PPTUnwindTranslator}
+import org.grapheco.lynx.physical.plans.{Aggregation, Apply, CreateIndex, CreateUnit, Cross, Delete, Distinct, DropIndex, Filter, Join, Limit, OrderBy, PhysicalPlan, ProcedureCall, Project, Select, Skip, Union, With}
 import org.grapheco.lynx.runner.CypherRunnerContext
 import org.opencypher.v9_0.expressions._
 
@@ -49,6 +49,7 @@ class DefaultPhysicalPlanner(runnerContext: CypherRunnerContext) extends Physica
         Join(None, isSingleMatch, joinType)(first, andThen, contextWithArg)
       }
       case patternMatch: LogicalPatternMatch => PPTPatternMatchTranslator(patternMatch)(plannerContext).translate(None)
+      case graphPatternMath: GraphPatternMatch => GraphPatternMatchTranslator(graphPatternMath)(plannerContext).translate(None)
       case lPTShortestPaths : LogicalShortestPaths => LPTShortestPathTranslator(lPTShortestPaths)(plannerContext).translate(None)
       case li@LogicalCreateIndex(labelName: String, properties: List[String]) => CreateIndex(labelName, properties)(plannerContext)
       case li@LogicalDropIndex(labelName: String, properties: List[String]) => DropIndex(labelName, properties)(plannerContext)

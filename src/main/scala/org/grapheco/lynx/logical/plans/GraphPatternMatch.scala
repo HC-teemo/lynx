@@ -26,14 +26,18 @@ object BOTH extends Direction
 case class GraphPatternNode(variableName: Option[String],
                             labels: Seq[LynxNodeLabel],
                             properties: Option[Expression],
-                            optional: Boolean = false)
+                            optional: Boolean = false) {
+  def withVariableName(newName: Option[String]): GraphPatternNode = this.copy(variableName = newName)
+}
 
 case class GraphPatternEdge(variableName: Option[String],
                             types: Seq[LynxRelationshipType],
                             properties: Option[Expression],
                             direction: Direction,
                             length: (Int, Int),
-                            optional: Boolean = false)
+                            optional: Boolean = false) {
+  def withVariableName(newName: Option[String]): GraphPatternEdge = this.copy(variableName = newName)
+}
 
 object ASTConvertor{
 
