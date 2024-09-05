@@ -9,6 +9,11 @@ import org.grapheco.lynx.types.property.LynxNull
 import org.grapheco.lynx.types.structural._
 import org.opencypher.v9_0.expressions.{Expression, LabelName, ListLiteral, LogicalVariable, NodePattern, Range, RelTypeName, RelationshipPattern, SemanticDirection}
 
+abstract class ExpandPlan(relVariable: String, nodeVariable: String)(l: PhysicalPlan, val plannerContext: PhysicalPlannerContext) extends SinglePhysicalPlan(l) {
+  override def schema: Seq[(String, LynxType)] = in.schema ++ Seq(relVariable -> LTRelationship, nodeVariable -> LTNode)
+}
+
+
 case class Expand(rel: RelationshipPattern, rightNode: NodePattern, optional: Boolean = false)(l: PhysicalPlan, val plannerContext: PhysicalPlannerContext)
   extends SinglePhysicalPlan(l) {
 

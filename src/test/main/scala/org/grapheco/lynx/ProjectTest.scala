@@ -33,13 +33,8 @@ class ProjectTest extends TestBase {
   def applyBug(): Unit = {
     runOnDemoGraph(
       """
-        |MATCH (:Person {id: 21990232611663})<-[:HAS_CREATOR]-(message)
-        |WITH
-        | message
-        |LIMIT 10
-        |MATCH (message)-[:REPLY_OF*0..]->(post:Post)
-        |RETURN
-        | post.id AS postId
+        |MATCH (:Person {id: 21990232611663})<-[:HAS_CREATOR]-(message)-[:HAS_REPLY]->(other)
+        |RETURN message,other
         |""".stripMargin)
   }
 
@@ -64,6 +59,16 @@ class ProjectTest extends TestBase {
         |MATCH (a:Person)-[:knows]-(b:Person)
         |optional MATCH (b)-[:knows]->(c:Author)
         |return a,b,c
+        |""".stripMargin)
+  }
+
+  @Test
+  def test14(): Unit = {
+    runOnDemoGraph(
+      """
+        |match (m:person),(n:Movie)
+        |where m.name=n.title
+        |return m,n
         |""".stripMargin)
   }
 

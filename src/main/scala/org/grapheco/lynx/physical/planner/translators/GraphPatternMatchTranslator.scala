@@ -19,4 +19,5 @@ case class GraphPatternMatchTranslator(patternMatch: GraphPatternMatch)(implicit
   override def translate(in: Option[PhysicalPlan])(implicit ppc: PhysicalPlannerContext): PhysicalPlan = {
     planPatternMatch(patternMatch)(ppc)
   }
+
 }

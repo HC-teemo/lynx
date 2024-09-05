@@ -58,7 +58,7 @@ object ASTConvertor{
       pattern.properties, Direction.fromCypher(pattern.direction), pattern.length)
 }
 
-class GraphPattern{
+class GraphPattern {
 
   private val adjacencyList: mutable.Map[GraphPatternNode, mutable.Set[(GraphPatternEdge, GraphPatternNode)]] = mutable.Map()
 

@@ -2,12 +2,37 @@ package org.grapheco.lynx.physical.plans
 
 import org.grapheco.lynx.types.{LTNode, LynxType, LynxValue}
 import org.grapheco.lynx.dataframe.DataFrame
-import org.grapheco.lynx.physical.PhysicalPlannerContext
+import org.grapheco.lynx.evaluator.ExpressionContext
+import org.grapheco.lynx.physical.{ExecuteException, PhysicalPlannerContext}
 import org.grapheco.lynx.runner._
 import org.grapheco.lynx.types.composite.LynxMap
-import org.grapheco.lynx.types.structural.{LynxNodeLabel, LynxPropertyKey}
+import org.grapheco.lynx.types.property.LynxInteger
+import org.grapheco.lynx.types.structural.{LynxId, LynxNodeLabel, LynxPropertyKey}
 import org.opencypher.v9_0.expressions._
 
+sealed abstract class NodesPlan(variable: String) extends LeafPhysicalPlan {
+  override def schema: Seq[(String, LynxType)] = Seq(variable -> LTNode)
+}
+
+class NodesPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
+  def allNodes(): AllNodes = AllNodes()(variable)
+
+  def seekByIndex(): NodeSeekByIndex = NodeSeekByIndex()(variable)
+
+  def seekByID(expr: Expression): NodeSeekByID = NodeSeekByID(expr)(variable)
+
+}
+
+/**
+ * Scan All Nodes
+ */
+case class AllNodes()(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
+  override def execute(implicit ctx: ExecutionContext): DataFrame = DataFrame(schema, () => graphModel.nodes().map(Seq(_)))
+}
+
+/**
+ * Scan Nodes By Labels
+ */
 case class NodeScan(pattern: NodePattern)(implicit val plannerContext: PhysicalPlannerContext) extends LeafPhysicalPlan {
 
   override def schema: Seq[(String, LynxType)] = {
@@ -58,5 +83,27 @@ case class NodeScan(pattern: NodePattern)(implicit val plannerContext: PhysicalP
         )
       ).map(Seq(_))
     })
+  }
+}
+
+/**
+ * Seek Node By Index
+ */
+case class NodeSeekByIndex()(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
+  override def execute(implicit ctx: ExecutionContext): DataFrame = ???
+}
+
+/**
+ * Seek Node By Id
+ * @param expr Id expression
+ */
+case class NodeSeekByID(expr: Expression)(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
+  override def execute(implicit ctx: ExecutionContext): DataFrame = {
+    implicit val ec: ExpressionContext = ctx.expressionContext
+    DataFrame(schema, () => graphModel.nodeAt(new LynxId {
+      val id: LynxInteger = eval(expr).asInstanceOf[LynxInteger]
+      override val value: Any = id
+      override def toLynxInteger: LynxInteger = id
+    }).map(Seq(_)).map(Iterator(_)).getOrElse(throw ExecuteException("id of node can not be empty")))
   }
 }

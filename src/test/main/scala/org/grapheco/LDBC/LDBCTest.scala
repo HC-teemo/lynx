@@ -53,4 +53,5 @@ class LDBCTest extends TestBase {
         |MATCH (n) RETURN COUNT(n)
         |""".stripMargin, Map.empty).show()
   }
+
 }
