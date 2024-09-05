@@ -7,8 +7,8 @@ import org.grapheco.lynx.runner.ExecutionContext
 import org.grapheco.lynx.types.composite.LynxList
 import org.opencypher.v9_0.expressions.{Expression, Variable}
 
-case class Unwind(expression: Expression, variable: Variable)(l: Option[PhysicalPlan], val plannerContext: PhysicalPlannerContext)
-  extends AbstractPhysicalPlan(l) {
+case class Unwind(expression: Expression, variable: Variable)(implicit val plannerContext: PhysicalPlannerContext)
+  extends AbstractPhysicalPlan {
   def in: Option[PhysicalPlan] = this.left
   override def schema: Seq[(String, LynxType)] = in.map(_.schema).getOrElse(Seq.empty) ++ Seq((variable.name, LTAny)) // TODO it is CTAny?
 

@@ -372,4 +372,13 @@ class LDBCQueryTest extends LazyLogging{
         |RETURN a,b,c,d
         |""".stripMargin)
   }
+
+
+  @Test
+  def test3(): Unit = {
+    ldbcTestBase.run(
+      """
+        |MATCH p=()-[r:HAS_MODERATOR]->() RETURN p LIMIT 25
+        |""".stripMargin, Map.empty).show()
+  }
 }
