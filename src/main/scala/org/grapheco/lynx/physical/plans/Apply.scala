@@ -5,8 +5,7 @@ import org.grapheco.lynx.dataframe.{DataFrame, InnerJoin, JoinType}
 import org.grapheco.lynx.physical.PhysicalPlannerContext
 import org.grapheco.lynx.runner.ExecutionContext
 
-case class Apply(joinType: JoinType = InnerJoin)(l: PhysicalPlan, r: PhysicalPlan, val plannerContext: PhysicalPlannerContext) extends
-  DoublePhysicalPlan(l, r){
+case class Apply(joinType: JoinType = InnerJoin)(implicit val plannerContext: PhysicalPlannerContext) extends DoublePhysicalPlan{
 
   override def schema: Seq[(String, LynxType)] = this.left.get.schema ++ this.right.get.schema
 

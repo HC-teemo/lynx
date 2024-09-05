@@ -14,7 +14,7 @@ sealed abstract class NodesPlan(variable: String) extends LeafPhysicalPlan {
   override def schema: Seq[(String, LynxType)] = Seq(variable -> LTNode)
 }
 
-class NodesPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
+case class NodesPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
   def allNodes(): AllNodes = AllNodes()(variable)
 
   def seekByIndex(): NodeSeekByIndex = NodeSeekByIndex()(variable)

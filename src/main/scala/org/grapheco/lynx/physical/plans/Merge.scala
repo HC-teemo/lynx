@@ -23,8 +23,8 @@ import scala.collection.mutable
 case class Merge(mergeSchema: Seq[(String, LynxType)],
                  mergeOps: Seq[FormalElement],
                  onMatch: Seq[OnMatch],
-                 onCreate: Seq[OnCreate])(l: Option[PhysicalPlan], val plannerContext: PhysicalPlannerContext)
-  extends AbstractPhysicalPlan(l) {
+                 onCreate: Seq[OnCreate])(implicit val plannerContext: PhysicalPlannerContext)
+  extends AbstractPhysicalPlan {
 
   override def schema: Seq[(String, LynxType)] = mergeSchema ++ left.map(_.schema).getOrElse(Seq.empty)
 

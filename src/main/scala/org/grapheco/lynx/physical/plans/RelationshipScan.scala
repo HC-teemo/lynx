@@ -13,7 +13,7 @@ sealed abstract class RelationshipsPlan(variable: String) extends LeafPhysicalPl
   override def schema: Seq[(String, LynxType)] = Seq(variable -> LTRelationship)
 }
 
-class RelationshipsPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
+case class RelationshipsPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
 
 }
 

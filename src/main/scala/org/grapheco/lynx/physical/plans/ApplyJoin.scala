@@ -12,9 +12,7 @@ import org.opencypher.v9_0.expressions.Expression
  */
 case class ApplyJoin(filterExpr: Option[Expression],
                      isSingleMatch: Boolean,
-                     joinType: JoinType)
-                    (l: PhysicalPlan, r: PhysicalPlan, val plannerContext: PhysicalPlannerContext)
-  extends DoublePhysicalPlan(l,r) {
+                     joinType: JoinType) (implicit val plannerContext: PhysicalPlannerContext) extends DoublePhysicalPlan {
 //  override val children: Seq[PhysicalPlan] = Seq(a, b)
 
   val a:PhysicalPlan = this.left.get

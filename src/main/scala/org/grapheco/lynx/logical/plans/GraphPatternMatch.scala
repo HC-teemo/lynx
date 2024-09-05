@@ -85,4 +85,6 @@ class GraphPattern {
   def neighbors(node: GraphPatternNode): Set[GraphPatternNode] =
     adjacencyList.getOrElse(node, Set()).map(_._2).toSet
 
+  def allNodes: Seq[GraphPatternNode] = adjacencyList.keys.toSeq
+
 }
