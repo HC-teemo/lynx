@@ -19,13 +19,13 @@ case class PPTPatternMatchTranslator(patternMatch: LogicalPatternMatch)(implicit
         case Nil => FromArgument(headNode.variable.get.name)(ppc)
         //match (m)-[r]-(n)
 //        case List(Tuple2(rel, rightNode)) => RelationshipScan(rel, headNode, rightNode)(ppc)
-        case List(Tuple2(rel, rightNode)) => Expand(rel, rightNode, optional)(FromArgument(headNode.variable.get.name)(ppc), plannerContext)
+        case List(Tuple2(rel, rightNode)) => Expand(rel, rightNode, optional)(plannerContext).withChildren(Some(FromArgument(headNode.variable.get.name)(ppc)))
         //match (m)-[r]-(n)-...-[p]-(z)
         case _ =>
           val (lastRelationship, lastNode) = chain.last
           val dropped = chain.dropRight(1)
           val part = planPatternMatch(LogicalPatternMatch(optional, variableName, headNode, dropped))(ppc)
-          Expand(lastRelationship, lastNode, optional)(part, plannerContext)
+          Expand(lastRelationship, lastNode, optional)(plannerContext).withChildren(Some(part))
       }
     } else {
       chain.toList match {
@@ -38,7 +38,7 @@ case class PPTPatternMatchTranslator(patternMatch: LogicalPatternMatch)(implicit
           val (lastRelationship, lastNode) = chain.last
           val dropped = chain.dropRight(1)
           val part = planPatternMatch(LogicalPatternMatch(optional, variableName, headNode, dropped))(ppc)
-          Expand(lastRelationship, lastNode)(part, plannerContext)
+          Expand(lastRelationship, lastNode)(plannerContext).withChildren(Some(part))
       }
     }
   }

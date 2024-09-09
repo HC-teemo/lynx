@@ -5,11 +5,11 @@ import org.grapheco.lynx.physical.plans.{AllNodes, NodeSeekByID, NodeSeekByIndex
 case class Candidate(var plan: PhysicalPlan, var cost:BigDecimal, var cardinal:Long)
 
 object CostCalculator {
-  val _factor: Map[Class[PhysicalPlan], Float] = Map(
+  val _factor: Map[Class[_<:PhysicalPlan], Float] = Map(
     // nodes
-    AllNodes -> 1,
-    NodeSeekByID -> 1,
-    NodeSeekByIndex -> 1,
+    classOf[AllNodes] -> 1,
+    classOf[NodeSeekByID] -> 1,
+    classOf[NodeSeekByIndex] -> 1,
   )
 
   def cost(plan: PhysicalPlan): Candidate = {
