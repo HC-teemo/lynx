@@ -32,16 +32,15 @@ class CostBasedPlanner()(implicit ppc: PhysicalPlannerContext ){
   //单个节点最优计划
   private def nodePlan(node: GraphPatternNode): Candidate = {
     val factory = NodesPlanFactory(node.variableName.get)
-    val localCandidate: Set[Candidate] = Set.empty ++
+    val localCandidate: Set[PhysicalPlan] = Set.empty +
       // C1: allNodes
        PhysicalPlanBuffer(factory.allNodes())
-        .andThen(Filter(node.properties.get))
-        .mapPlan(CostCalculator.cost)
+        .andThen(Filter(node.properties.get)).plan
       // C2: nodeScanByLabel
       // C3: nodeSeekByIndex
       // C4: nodeSeekById
     // ...
-    localCandidate.minBy(_.cost)
+    localCandidate.map(CostCalculator.cost).minBy(_.cost)
   }
 
   private def triplePlan(start: GraphPatternNode, rel: GraphPatternEdge, end: GraphPatternNode): Candidate = {

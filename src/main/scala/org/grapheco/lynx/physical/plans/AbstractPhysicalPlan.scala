@@ -64,7 +64,4 @@ case class PhysicalPlanBuffer(plan: PhysicalPlan) {
   def andThen(physicalPlan: PhysicalPlan): PhysicalPlanBuffer =
     PhysicalPlanBuffer(physicalPlan.withChildren(physicalPlan.children ++ Some(this.plan)))
 
-  def use(func: PhysicalPlan=>{}): Unit = func(plan)
-
-  def mapPlan[T](func: PhysicalPlan=>T): T = func(plan)
 }

@@ -74,14 +74,7 @@ case class Merge(mergeSchema: Seq[(String, LynxType)],
     // actions
     val items = if (hasMatched) onMatch.flatMap(_.action.items) else onCreate.flatMap(_.action.items)
     if (items.nonEmpty) {
-      Set(items)(new PhysicalPlan { // temp PPTNode to execute SetClause
-        override val schema: Seq[(String, LynxType)] = df.schema
-
-        override def execute(implicit ctx: ExecutionContext): DataFrame = df
-
-        override var left: Option[PhysicalPlan] = None
-        override var right: Option[PhysicalPlan] = None
-      }, plannerContext).execute(ctx)
+      Set(items).execute(ctx)
     } else df
   }
 }
