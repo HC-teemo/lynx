@@ -12,7 +12,9 @@ import org.opencypher.v9_0.expressions.{NodePattern, RelationshipPattern}
 
 case class GraphPatternMatchTranslator(patternMatch: GraphPatternMatch)(implicit val plannerContext: PhysicalPlannerContext) extends PPTNodeTranslator {
   private def planPatternMatch(gp: GraphPatternMatch)(implicit ppc: PhysicalPlannerContext): PhysicalPlan = {
-    null
+    val costBasedPlanner= new CostBasedPlanner()(ppc)
+    costBasedPlanner.plan(gp.graphPattern)
+
   }
 
   override def translate(in: Option[PhysicalPlan])(implicit ppc: PhysicalPlannerContext): PhysicalPlan = {

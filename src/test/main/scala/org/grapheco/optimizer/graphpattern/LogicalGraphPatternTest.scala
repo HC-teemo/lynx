@@ -5,13 +5,30 @@ import org.junit.jupiter.api.Test
 
 class LogicalGraphPatternTest extends TestBase{
   @Test
-  def singleNodeMatch(): Unit = {
+  def singleAllNodeMatch(): Unit = {
+    runOnDemoGraph(
+      """
+        |MATCH (p) RETURN p
+        |""".stripMargin)
+  }
+
+  @Test
+  def singleNodeByLabelMatch(): Unit = {
     runOnDemoGraph(
       """
         |MATCH (p:Person) RETURN p
         |""".stripMargin)
   }
 
+  @Test
+  def singleNodeIndexMatch(): Unit = {
+    runOnDemoGraph(
+      """
+        |MATCH (p:Person{id: "304398046515308"}) RETURN p
+        |""".stripMargin)
+  }
+  //MATCH (p:person{gender: "female"}) RETURN p
+  //MATCH (p{gender: "female"}) RETURN p
   @Test
   def chain(): Unit = {
     runOnDemoGraph(
