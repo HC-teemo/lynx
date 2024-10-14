@@ -18,26 +18,7 @@ class DefaultPhysicalPlanner(runnerContext: CypherRunnerContext) extends Physica
   override def plan(logicalPlan: LogicalPlan)(implicit plannerContext: PhysicalPlannerContext): PhysicalPlan = {
     implicit val runnerContext: CypherRunnerContext = plannerContext.runnerContext
     logicalPlan match {
-      case single: SingleLogicalPlan => (single match {
-        case LogicalAggregation(a, g) => Aggregation(a, g)
-        case LogicalDelete(expressions,forced) => Delete(expressions, forced)
-        case LogicalDistinct() => Distinct()
-        case LogicalFilter(expr) => Filter(expr)
-        case LogicalLimit(expr) => Limit(expr)
-        case LogicalOrderBy(sortItem) => OrderBy(sortItem)
-        case LogicalProject(ri) => Project(ri)
-        case LogicalSelect(columns: Seq[(String, Option[String])]) => Select(columns)
-        case LogicalSkip(expr) => Skip(expr)
-        case LogicalUnwind(u) => Unwind(u.expression, u.variable)
-        case LogicalWith(ri) => With(ri)
-      }).withChildren(single.left.map(plan))
-      case leaf: LeafLogicalPlan => leaf match {
-        case LogicalCreateIndex(labelName: String, properties: List[String]) => CreateIndex(labelName, properties)
-        case LogicalCreateUnit(items) => CreateUnit(items)
-        case LogicalDropIndex(labelName: String, properties: List[String]) => DropIndex(labelName, properties)
-        case LogicalProcedureCall(procedureNamespace: Namespace, procedureName: ProcedureName, declaredArguments: Option[Seq[Expression]]) =>
-          ProcedureCall(procedureNamespace: Namespace, procedureName: ProcedureName, declaredArguments: Option[Seq[Expression]])
-      }
+
       // With 2 Child
       case un@LogicalUnion(distinct) => Union(distinct).withChildren(un.left.map(plan), un.right.map(plan))
       case lj@LogicalJoin(isSingleMatch, joinType) => Join(None, isSingleMatch, joinType).withChildren(lj.left.map(plan), lj.right.map(plan))
@@ -62,7 +43,46 @@ class DefaultPhysicalPlanner(runnerContext: CypherRunnerContext) extends Physica
       case lm@LogicalMerge(pattern, actions) => PPTMergeTranslator(pattern, actions).translate(lm.in.map(plan(_)))(plannerContext)
       case sc@LogicalSetClause(d) => PPTSetClauseTranslator(d.items).translate(sc.in.map(plan(_)))(plannerContext)
       case lr@LogicalRemove(r) => PPTRemoveTranslator(r.items).translate(lr.in.map(plan(_)))(plannerContext)
-
+      case single: SingleLogicalPlan => (single match {
+        case LogicalAggregation(a, g) => Aggregation(a, g)
+        case LogicalDelete(expressions, forced) => Delete(expressions, forced)
+        case LogicalDistinct() => Distinct()
+        case LogicalFilter(expr) => Filter(expr)
+        case LogicalLimit(expr) => Limit(expr)
+        case LogicalOrderBy(sortItem) => OrderBy(sortItem)
+        case LogicalProject(ri) => Project(ri)
+        case LogicalSelect(columns: Seq[(String, Option[String])]) => Select(columns)
+        case LogicalSkip(expr) => Skip(expr)
+        case LogicalUnwind(u) => Unwind(u.expression, u.variable)
+        case LogicalWith(ri) => With(ri)
+      }).withChildren(single.left.map(plan))
+      case leaf: LeafLogicalPlan => leaf match {
+        case LogicalCreateIndex(labelName: String, properties: List[String]) => CreateIndex(labelName, properties)
+        case LogicalCreateUnit(items) => CreateUnit(items)
+        case LogicalDropIndex(labelName: String, properties: List[String]) => DropIndex(labelName, properties)
+        case LogicalProcedureCall(procedureNamespace: Namespace, procedureName: ProcedureName, declaredArguments: Option[Seq[Expression]]) =>
+          ProcedureCall(procedureNamespace: Namespace, procedureName: ProcedureName, declaredArguments: Option[Seq[Expression]])
+      }
+      case single: SingleLogicalPlan => (single match {
+        case LogicalAggregation(a, g) => Aggregation(a, g)
+        case LogicalDelete(expressions, forced) => Delete(expressions, forced)
+        case LogicalDistinct() => Distinct()
+        case LogicalFilter(expr) => Filter(expr)
+        case LogicalLimit(expr) => Limit(expr)
+        case LogicalOrderBy(sortItem) => OrderBy(sortItem)
+        case LogicalProject(ri) => Project(ri)
+        case LogicalSelect(columns: Seq[(String, Option[String])]) => Select(columns)
+        case LogicalSkip(expr) => Skip(expr)
+        case LogicalUnwind(u) => Unwind(u.expression, u.variable)
+        case LogicalWith(ri) => With(ri)
+      }).withChildren(single.left.map(plan))
+      case leaf: LeafLogicalPlan => leaf match {
+        case LogicalCreateIndex(labelName: String, properties: List[String]) => CreateIndex(labelName, properties)
+        case LogicalCreateUnit(items) => CreateUnit(items)
+        case LogicalDropIndex(labelName: String, properties: List[String]) => DropIndex(labelName, properties)
+        case LogicalProcedureCall(procedureNamespace: Namespace, procedureName: ProcedureName, declaredArguments: Option[Seq[Expression]]) =>
+          ProcedureCall(procedureNamespace: Namespace, procedureName: ProcedureName, declaredArguments: Option[Seq[Expression]])
+      }
       case _ => throw new Exception("physical plan not support:" +logicalPlan)
     }
   }

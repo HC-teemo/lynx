@@ -1,5 +1,4 @@
 package org.grapheco.optimizer.graphpattern
-
 import org.grapheco.lynx.TestBase
 import org.junit.jupiter.api.Test
 
@@ -21,14 +20,24 @@ class LogicalGraphPatternTest extends TestBase{
   }
 
   @Test
-  def singleNodeIndexMatch(): Unit = {
+  def singleNodeByIdMatch(): Unit = {
     runOnDemoGraph(
       """
         |MATCH (p:Person{id: "304398046515308"}) RETURN p
         |""".stripMargin)
   }
-  //MATCH (p:person{gender: "female"}) RETURN p
-  //MATCH (p{gender: "female"}) RETURN p
+  //MATCH (p{id: "304398046515308",lastName: "Carter"}) RETURN p
+
+  @Test
+  def singleNodeByIndexMatch(): Unit = {
+    runOnDemoGraph(
+      """
+        |MATCH (p:Person{lastName: "Carter"}) RETURN p
+        |""".stripMargin)
+  }
+  //MATCH (p{id: "304398046515308"}) RETURN p
+  //MATCH (p:person{gender: "male"}) RETURN p
+  //MATCH (p:person{id: "304398046515308",gender: "female",lastName: "Carter"}) RETURN p
   @Test
   def chain(): Unit = {
     runOnDemoGraph(

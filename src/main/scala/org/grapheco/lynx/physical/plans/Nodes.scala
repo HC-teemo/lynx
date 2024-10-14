@@ -11,16 +11,16 @@ import org.grapheco.lynx.types.property.LynxInteger
 import org.grapheco.lynx.types.structural.{LynxId, LynxNodeLabel, LynxPropertyKey}
 import org.opencypher.v9_0.expressions._
 
-sealed abstract class NodesPlan(variable: String) extends LeafPhysicalPlan {
+sealed abstract class NodesPlan( variable: String) extends LeafPhysicalPlan {
   override def schema: Seq[(String, LynxType)] = Seq(variable -> LTNode)
 }
 
 case class NodesPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
   def allNodes(): AllNodes = AllNodes()(variable)
 
-  def nodeScan(pattern: GraphPatternNode): NodeScan = NodeScan(pattern)(variable)
+  def nodeScan(pattern: GraphPatternNode): NodeScanByLabel = NodeScanByLabel(pattern)(variable)
 
-  def seekByIndex(): NodeSeekByIndex = NodeSeekByIndex()(variable)
+  def seekByIndex(pattern: GraphPatternNode): NodeSeekByIndex = NodeSeekByIndex(pattern)(variable)
 
   def seekByID(expr: Expression): NodeSeekByID = NodeSeekByID(expr)(variable)
 
@@ -36,7 +36,7 @@ case class AllNodes()(variable: String)(implicit val plannerContext: PhysicalPla
 /**
  * Scan Nodes By Labels
  */
-case class NodeScan(pattern: GraphPatternNode)(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable) {
+case class NodeScanByLabel(pattern: GraphPatternNode)(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable) {
 
   override def schema: Seq[(String, LynxType)] = {
     val GraphPatternNode(
@@ -91,7 +91,7 @@ case class NodeScan(pattern: GraphPatternNode)(variable: String)(implicit val pl
 /**
  * Seek Node By Index
  */
-case class NodeSeekByIndex()(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
+case class NodeSeekByIndex(pattern: GraphPatternNode)(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
   override def execute(implicit ctx: ExecutionContext): DataFrame = ???
 }
 
