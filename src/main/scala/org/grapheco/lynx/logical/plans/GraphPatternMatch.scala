@@ -28,6 +28,8 @@ case class GraphPatternNode(variableName: Option[String],
                             properties: Option[Expression],
                             optional: Boolean = false) {
   def withVariableName(newName: Option[String]): GraphPatternNode = this.copy(variableName = newName)
+  def withLabels(newLabels: Seq[LynxNodeLabel]): GraphPatternNode = this.copy(labels = newLabels)
+  def withProperties(newProperties: Expression): GraphPatternNode = this.copy(properties = Some(newProperties))
 }
 
 case class GraphPatternEdge(variableName: Option[String],

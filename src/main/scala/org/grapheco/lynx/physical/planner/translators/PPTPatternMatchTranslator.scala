@@ -1,11 +1,12 @@
 package org.grapheco.lynx.physical.planner.translators
-
+import org.grapheco.lynx.logical.plans.ASTConvertor._
 import org.grapheco.lynx.logical.plans.LogicalPatternMatch
 import org.grapheco.lynx.physical
 import org.grapheco.lynx.physical.planner.PPTNodeTranslator
-import org.grapheco.lynx.physical.plans.{Expand, FromArgument, NodeScan, PhysicalPlan, RelationshipScan}
+import org.grapheco.lynx.physical.plans.{Expand, FromArgument, NodeScanByLabel, PhysicalPlan, RelationshipScan}
 import org.grapheco.lynx.physical.PhysicalPlannerContext
 import org.opencypher.v9_0.expressions.{NodePattern, RelationshipPattern}
+import scala.language.implicitConversions
 
 // TODO: very complex, need more think!
 case class PPTPatternMatchTranslator(patternMatch: LogicalPatternMatch)(implicit val plannerContext: PhysicalPlannerContext) extends PPTNodeTranslator {
@@ -30,7 +31,8 @@ case class PPTPatternMatchTranslator(patternMatch: LogicalPatternMatch)(implicit
     } else {
       chain.toList match {
         //match (m)
-        case Nil => NodeScan(headNode)(ppc)
+        case Nil =>NodeScanByLabel(headNode)(headNode.variable.get.toString)(ppc)
+
         //match (m)-[r]-(n)
         case List(Tuple2(rel, rightNode)) => RelationshipScan(rel, headNode, rightNode)(ppc)
         //match (m)-[r]-(n)-...-[p]-(z)

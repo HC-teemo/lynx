@@ -3,6 +3,7 @@ package org.grapheco.lynx.physical.plans
 import org.grapheco.lynx.types.{LTNode, LynxType, LynxValue}
 import org.grapheco.lynx.dataframe.DataFrame
 import org.grapheco.lynx.evaluator.ExpressionContext
+import org.grapheco.lynx.logical.plans.GraphPatternNode
 import org.grapheco.lynx.physical.{ExecuteException, PhysicalPlannerContext}
 import org.grapheco.lynx.runner._
 import org.grapheco.lynx.types.composite.LynxMap
@@ -10,14 +11,16 @@ import org.grapheco.lynx.types.property.LynxInteger
 import org.grapheco.lynx.types.structural.{LynxId, LynxNodeLabel, LynxPropertyKey}
 import org.opencypher.v9_0.expressions._
 
-sealed abstract class NodesPlan(variable: String) extends LeafPhysicalPlan {
+sealed abstract class NodesPlan( variable: String) extends LeafPhysicalPlan {
   override def schema: Seq[(String, LynxType)] = Seq(variable -> LTNode)
 }
 
 case class NodesPlanFactory(variable: String)(implicit val plannerContext: PhysicalPlannerContext){
   def allNodes(): AllNodes = AllNodes()(variable)
 
-  def seekByIndex(): NodeSeekByIndex = NodeSeekByIndex()(variable)
+  def nodeScan(pattern: GraphPatternNode): NodeScanByLabel = NodeScanByLabel(pattern)(variable)
+
+  def seekByIndex(pattern: GraphPatternNode): NodeSeekByIndex = NodeSeekByIndex(pattern)(variable)
 
   def seekByID(expr: Expression): NodeSeekByID = NodeSeekByID(expr)(variable)
 
@@ -33,23 +36,23 @@ case class AllNodes()(variable: String)(implicit val plannerContext: PhysicalPla
 /**
  * Scan Nodes By Labels
  */
-case class NodeScan(pattern: NodePattern)(implicit val plannerContext: PhysicalPlannerContext) extends LeafPhysicalPlan {
+case class NodeScanByLabel(pattern: GraphPatternNode)(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable) {
 
   override def schema: Seq[(String, LynxType)] = {
-    val NodePattern(
-    Some(var0: LogicalVariable),
+    val GraphPatternNode(
+    Some(var0: String),
     labels: Seq[LabelName],
     properties: Option[Expression],
-    baseNode: Option[LogicalVariable]) = pattern
-    Seq(var0.name -> LTNode)
+    optional) = pattern
+    Seq(var0 -> LTNode)
   }
 
   override def execute(implicit ctx: ExecutionContext): DataFrame = {
-    val NodePattern(
-    Some(var0: LogicalVariable),
-    labels: Seq[LabelName],
+    val GraphPatternNode(
+    Some(var0: String),
+    labels: Seq[LynxNodeLabel],
     properties: Option[Expression],
-    baseNode: Option[LogicalVariable]) = pattern
+    optional) = pattern
     implicit val ec = ctx.expressionContext
 
     val (nodeProperties, nodeProps) = if (properties.isEmpty) (Map.empty[LynxPropertyKey, LynxValue], Map.empty[LynxPropertyKey, PropOp])
@@ -75,11 +78,10 @@ case class NodeScan(pattern: NodePattern)(implicit val plannerContext: PhysicalP
         (properties.map(eval(_).asInstanceOf[LynxMap].value.map(kv => (LynxPropertyKey(kv._1), kv._2))).getOrElse(Map.empty), Map.empty[LynxPropertyKey, PropOp])
       }
     }
-    DataFrame(Seq(var0.name -> LTNode), () => {
+    DataFrame(Seq(var0 -> LTNode), () => {
       graphModel.nodes(
         NodeFilter(
-          labels.map(_.name).map(LynxNodeLabel),
-          nodeProperties, nodeProps
+          labels, nodeProperties, nodeProps
         )
       ).map(Seq(_))
     })
@@ -89,7 +91,7 @@ case class NodeScan(pattern: NodePattern)(implicit val plannerContext: PhysicalP
 /**
  * Seek Node By Index
  */
-case class NodeSeekByIndex()(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
+case class NodeSeekByIndex(pattern: GraphPatternNode)(variable: String)(implicit val plannerContext: PhysicalPlannerContext) extends NodesPlan(variable){
   override def execute(implicit ctx: ExecutionContext): DataFrame = ???
 }
 
